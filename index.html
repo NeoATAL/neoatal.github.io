@@ -3,88 +3,146 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ATAL Hava Durumu · ECMWF IFS</title>
+  <title>ATAL Hava Durumu</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
   <style>
-    :root{
-      --bg1:#0b1220;--bg2:#06111a;
-      --aur1:#1de5ff;--aur2:#8cffcb;--aur3:#b388ff;
-      --muted:#9fb0c4;--txt:#e9f3ff;
+    body {
+      margin:0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:Inter,system-ui,Arial;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2));
-      color:var(--txt);
+    header {
+      text-align:center;
+      padding:15px;
+      background:rgba(255,255,255,0.05);
+      font-size:18px;
+      font-weight:bold;
     }
-    .wrap{max-width:1100px;margin:0 auto;padding:12px;
-      display:grid;grid-template-columns:340px 1fr;gap:12px}
-    header{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-    .brand{display:flex;align-items:center;gap:8px}
-    .logo{width:28px;height:28px;border-radius:8px;
-      background:conic-gradient(from 200deg,var(--aur1),var(--aur2),var(--aur3))}
-    .title{font-weight:700;font-size:15px}
-    .muted{color:var(--muted);font-size:13px}
-    .card{background:rgba(255,255,255,.05);border-radius:12px;padding:10px}
-    .temp{font-size:42px;font-weight:800;margin:6px 0}
-    .kv{display:flex;gap:6px;align-items:center;font-size:13px}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-    .day{display:flex;justify-content:space-between;align-items:center;
-      padding:8px;background:rgba(255,255,255,.05);margin-top:4px;border-radius:8px;cursor:pointer}
-    .day:hover{background:rgba(255,255,255,.1)}
-    .hstrip{display:flex;gap:6px;overflow-x:auto;margin-top:6px}
-    .hour{min-width:72px;background:rgba(255,255,255,.05);
-      border-radius:8px;text-align:center;padding:6px;font-size:12px}
-    .tabs{display:flex;gap:6px;margin-bottom:4px}
-    .tab{flex:1;text-align:center;padding:6px;background:rgba(255,255,255,.07);
-      border-radius:8px;cursor:pointer;font-size:13px}
-    .tab.active{background:rgba(255,255,255,.15);font-weight:600}
-    canvas{background:rgba(255,255,255,.03);border-radius:8px}
-    footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:11px;margin-top:6px}
-    @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .temp {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .kv {
+      background: rgba(255,255,255,0.05);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .daily {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .day {
+      flex:0 0 auto;
+      padding:8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      text-align:center;
+      cursor:pointer;
+    }
+    .day:hover {
+      background: rgba(255,255,255,0.15);
+    }
+    .hourly {
+      display:flex;
+      gap:6px;
+      overflow-x:auto;
+    }
+    .hour {
+      flex:0 0 auto;
+      padding:6px;
+      background:rgba(255,255,255,0.08);
+      border-radius:6px;
+      text-align:center;
+      font-size:12px;
+    }
+    .tabs {
+      display:flex;
+      gap:6px;
+      margin-bottom:6px;
+    }
+    .tab {
+      flex:1;
+      text-align:center;
+      padding:6px;
+      background:rgba(255,255,255,0.1);
+      border-radius:6px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .tab.active {
+      background:#00c6ff;
+      font-weight:bold;
+    }
+    canvas {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+    }
+    footer {
+      text-align:center;
+      font-size:12px;
+      color:#ccc;
+      padding:10px;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo"></div>
-      <div>
-        <div class="title">Adem Tolunay Anadolu Lisesi Hava Durumu</div>
-        <div class="muted">ECMWF IFS (Open-Meteo)</div>
+  <header>Adem Tolunay Anadolu Lisesi · ECMWF IFS</header>
+  <div class="container">
+    <div class="card">
+      <div id="meta">Yükleniyor…</div>
+      <div class="temp" id="cur-temp">--°</div>
+      <div class="grid">
+        <div class="kv">🌡️ Hissedilen: <b id="cur-feels">—</b></div>
+        <div class="kv">💧 Nem: <b id="cur-rh">—</b></div>
+        <div class="kv">💨 Rüzgar: <b id="cur-wind">—</b></div>
+        <div class="kv">🔽 Basınç: <b id="cur-press">—</b></div>
+        <div class="kv">🌧️ Yağış: <b id="cur-precip">—</b></div>
       </div>
     </div>
-  </header>
 
-  <section class="card">
-    <div class="muted" id="meta">Yükleniyor…</div>
-    <div class="temp" id="cur-temp">--°</div>
-    <div class="grid2">
-      <div class="kv">🌡️ Hissedilen: <b id="cur-feels">—</b></div>
-      <div class="kv">💧 Nem: <b id="cur-rh">—</b></div>
-      <div class="kv">💨 Rüzgar: <b id="cur-wind">—</b></div>
-      <div class="kv">🔽 Basınç: <b id="cur-press">—</b></div>
-      <div class="kv">🌧️ Yağış: <b id="cur-precip">—</b></div>
+    <div class="card">
+      <h3>📅 Günlük Tahmin</h3>
+      <div class="daily" id="daily"></div>
     </div>
-    <div class="muted" style="margin-top:6px">📅 Günlük (7 gün)</div>
-    <div id="daily"></div>
-    <div class="muted" style="margin-top:6px">🕒 Seçili Gün Saatlik</div>
-    <div class="hstrip" id="hourly"></div>
-  </section>
 
-  <section class="card">
-    <div class="tabs">
-      <div class="tab active" data-s="temp">🌡️</div>
-      <div class="tab" data-s="precip">🌧️</div>
-      <div class="tab" data-s="wind">💨</div>
-      <div class="tab" data-s="humidity">💧</div>
-      <div class="tab" data-s="pressure">🔽</div>
+    <div class="card">
+      <h3>🕒 Saatlik Detay</h3>
+      <div class="hourly" id="hourly"></div>
     </div>
-    <canvas id="chart" height="120"></canvas>
-  </section>
 
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-s="temp">🌡️ Sıcaklık</div>
+        <div class="tab" data-s="precip">🌧️ Yağış</div>
+        <div class="tab" data-s="wind">💨 Rüzgar</div>
+        <div class="tab" data-s="humidity">💧 Nem</div>
+        <div class="tab" data-s="pressure">🔽 Basınç</div>
+      </div>
+      <canvas id="chart" height="140"></canvas>
+    </div>
+  </div>
   <footer>Kaynak: Open-Meteo ECMWF IFS API</footer>
-</div>
 
 <script>
 const LAT=36.89083,LON=30.67111;
@@ -95,12 +153,8 @@ const API=`https://api.open-meteo.com/v1/ecmwf?latitude=${LAT}&longitude=${LON}&
 let STATE={data:null,series:'temp',chart:null,selectedDay:0};
 const fmt=(iso,o={})=>new Date(iso).toLocaleString('tr-TR',o);
 
-async function loadData(){
-  const r=await fetch(API); STATE.data=await r.json(); renderAll();
-}
-
+async function loadData(){const r=await fetch(API);STATE.data=await r.json();renderAll();}
 function renderAll(){renderCurrent();renderDaily();renderHourly();drawChart();}
-
 function renderCurrent(){
   const h=STATE.data.hourly;
   document.getElementById('meta').textContent=fmt(h.time[0],{weekday:'long',hour:'2-digit'});
@@ -111,57 +165,39 @@ function renderCurrent(){
   document.getElementById('cur-press').textContent=`${h.pressure_msl[0].toFixed(0)} hPa`;
   document.getElementById('cur-precip').textContent=`${h.precipitation[0].toFixed(1)} mm`;
 }
-
 function renderDaily(){
-  const d=STATE.data.daily; const box=document.getElementById('daily'); box.innerHTML='';
-  d.time.forEach((t,i)=>{
-    const el=document.createElement('div'); el.className='day';
+  const d=STATE.data.daily;const box=document.getElementById('daily');box.innerHTML='';
+  d.time.forEach((t,i)=>{const el=document.createElement('div');el.className='day';
     el.innerHTML=`<div><b>${fmt(t,{weekday:'short',day:'2-digit'})}</b></div>
-      <div>${Math.round(d.temperature_2m_min[i])}°/${Math.round(d.temperature_2m_max[i])}° · ${d.precipitation_sum[i]}mm</div>`;
+      <div>${Math.round(d.temperature_2m_min[i])}°/${Math.round(d.temperature_2m_max[i])}°<br>${d.precipitation_sum[i]}mm</div>`;
     el.onclick=()=>{STATE.selectedDay=i;renderHourly();drawChart();};
-    box.appendChild(el);
-  });
+    box.appendChild(el);});
 }
-
 function renderHourly(){
-  const h=STATE.data.hourly; const hs=document.getElementById('hourly'); hs.innerHTML='';
+  const h=STATE.data.hourly;const hs=document.getElementById('hourly');hs.innerHTML='';
   const day=STATE.data.daily.time[STATE.selectedDay];
-  h.time.forEach((t,i)=>{
-    if(t.startsWith(day)){
-      const el=document.createElement('div'); el.className='hour';
-      el.innerHTML=`<div>${fmt(t,{hour:'2-digit'})}</div><b>${h.temperature_2m[i].toFixed(0)}°</b><div>${h.precipitation[i].toFixed(1)}mm</div>`;
-      hs.appendChild(el);
-    }
-  });
+  h.time.forEach((t,i)=>{if(t.startsWith(day)){const el=document.createElement('div');el.className='hour';
+    el.innerHTML=`<div>${fmt(t,{hour:'2-digit'})}</div><b>${h.temperature_2m[i].toFixed(0)}°</b><div>${h.precipitation[i].toFixed(1)}mm</div>`;hs.appendChild(el);}});
 }
-
 function drawChart(){
-  const h=STATE.data.hourly; const labs=[]; const vals=[];
-  const day=STATE.data.daily.time[STATE.selectedDay];
-  h.time.forEach((t,i)=>{
-    if(t.startsWith(day)){
-      labs.push(fmt(t,{hour:'2-digit'}));
-      switch(STATE.series){
-        case 'temp': vals.push(h.temperature_2m[i]); break;
-        case 'precip': vals.push(h.precipitation[i]); break;
-        case 'wind': vals.push(h.wind_speed_10m[i]); break;
-        case 'humidity': vals.push(h.relative_humidity_2m[i]); break;
-        case 'pressure': vals.push(h.pressure_msl[i]); break;
-      }
-    }
-  });
-  if(STATE.chart) STATE.chart.destroy();
-  STATE.chart=new Chart(document.getElementById('chart'),
-    {type:(STATE.series==='precip'?'bar':'line'),
-     data:{labels:labs,datasets:[{label:STATE.series,data:vals,borderColor:'#8cffcb',backgroundColor:'rgba(121,246,233,.5)',tension:.25,pointRadius:0}]},
-     options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aac1da'}},y:{ticks:{color:'#aac1da'}}}}});
+  const h=STATE.data.hourly;const labs=[],vals=[];const day=STATE.data.daily.time[STATE.selectedDay];
+  h.time.forEach((t,i)=>{if(t.startsWith(day)){labs.push(fmt(t,{hour:'2-digit'}));
+    switch(STATE.series){
+      case 'temp':vals.push(h.temperature_2m[i]);break;
+      case 'precip':vals.push(h.precipitation[i]);break;
+      case 'wind':vals.push(h.wind_speed_10m[i]);break;
+      case 'humidity':vals.push(h.relative_humidity_2m[i]);break;
+      case 'pressure':vals.push(h.pressure_msl[i]);break;}}});
+  if(STATE.chart)STATE.chart.destroy();
+  STATE.chart=new Chart(document.getElementById('chart'),{
+    type:(STATE.series==='precip'?'bar':'line'),
+    data:{labels:labs,datasets:[{data:vals,borderColor:'#00c6ff',backgroundColor:'rgba(0,198,255,.5)',tension:.25,pointRadius:0}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#ccc'}},y:{ticks:{color:'#ccc'}}}}});
 }
-
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    tab.classList.add('active'); STATE.series=tab.dataset.s; drawChart();};
+    tab.classList.add('active');STATE.series=tab.dataset.s;drawChart();};
 });
-
 loadData();
 </script>
 </body>
